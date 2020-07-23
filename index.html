@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Loteria</title>
+
+
+    <script type="text/javascript" src="assets/js/lib/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/css/loteria.css">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="container">
+      <h1>Loteria</h1>
+
+      <div id="deck" class="vertical-center">
+
+        <img id="deckCardImage" src="assets/img/elGallo.png"/>
+
+        <progress value="0" max="5" id="progressBar" class="hide"></progress>
+
+        <button id="startOrReset" type="button" class="btn btn-success d-flex justify-content-center">Start!</button>
+
+      </div>
+
+      <div id="winnerDisplay" class="alert alert-success hide" role="alert"></div>
+
+      <div class="largeCard row d-flex justify-content-between" >
+
+        <div id="leftCard" class="leftCard col">
+
+          <h2> Your Card</h1>
+            <div class="alert alert-secondary" role="alert">
+              User Previous/Next button to select a card before starting game!
+            </div>
+            <button id="previousButton" type="button" class="btn btn-primary">Previous</button>
+            <button id="nextButton" type="button" class="btn btn-primary">Next</button>
+
+
+
+
+          <table>
+            <tr>
+              <th>Loteria</th>
+              <th></th>
+              <th></th>
+              <th id="leftTableNumber">Tabla 20</th>
+
+            </tr>
+          </table>
+        </div>
+
+        <div class="rightCard col">
+          <h2> Computer Card</h1>
+
+            <div class="alert alert-secondary" role="alert">
+              Computer table is selected randomly.
+            </div>
+
+          <table>
+            <tr>
+              <th>Loteria</th>
+              <th></th>
+              <th></th>
+              <th id="rightTableNumber">Tabla 20</th>
+
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="assets/js/loteria.js"></script>
+
+  </body>
+</html>
