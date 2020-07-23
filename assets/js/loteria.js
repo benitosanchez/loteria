@@ -11,7 +11,8 @@ var currentRightCard = 0;
 var countdownTimerSeconds = 5;
 var isGameOver;
 
-
+var computerWinsText = "Loteria! Computer Wins!";
+var playerWinsText = "Loteria! You Win!";
 
 var deck = document.querySelector('#deck');
 var deckImage = document.querySelector('#deckCardImage');
@@ -29,8 +30,7 @@ var alerts = document.querySelectorAll(".alert");
 init();
 
 function init() {
-
-  currentDeckCardIndex = 0;
+  currentDeckCardIndex = -1;
   isGameOver = false;
   cards = createAllCards();
   largeCards = setupLargeCards();
@@ -38,11 +38,14 @@ function init() {
   deckImage.src = "assets/img/cardBack.png";
   currentRightCard = generateRandomTableCardsIndex();
 
-  updateComputerTableCard();
-
-  updatePlayerTableCard();
+  updateCardTable(false); // set up card table for computer
+  updateCardTable(true); // setup card table for player
   listenToPlayerClicked();
+  listenForStartRestartButtonClicks();
+  listenForPreviousNextButtonClicks();
+}
 
+function listenForStartRestartButtonClicks() {
   startButton.addEventListener("click", function(){
     if (!isGameOver) {
       countdownTimer = setInterval(updateTimer, 1000);
@@ -59,12 +62,14 @@ function init() {
         alerts[i].classList.add("hide");
       }
 
-      startListeningToDeckClicks();
+      onDeckClicked();
     } else {
       location.reload();
     }
-  })
+  });
+}
 
+function listenForPreviousNextButtonClicks() {
   previousButton.addEventListener("click", function() {
     if (currentLeftCard == 0) {
       currentLeftCard = largeCards.length - 1;
@@ -73,7 +78,7 @@ function init() {
     }
     resetTableRows(leftCardTable);
     updatePlayerTableCard();
-  })
+  });
 
   nextButton.addEventListener("click", function() {
     if (currentLeftCard == largeCards.length - 1) {
@@ -83,34 +88,7 @@ function init() {
     }
     resetTableRows(leftCardTable);
     updatePlayerTableCard();
-  })
-
-}
-
-function shouldShowProgressBar(shouldShowProgressBar) {
-  if (shouldShowProgressBar) {
-    progressBar.setAttribute("class", "")
-    progressBar.classList.add("show");
-  } else {
-    progressBar.setAttribute("class", "")
-    progressBar.classList.add("hide");
-  }
-}
-
-function startListeningToDeckClicks() {
-  deck.addEventListener("click", function() {
-    onDeckClicked();
   });
-}
-
-function resetTableRows(table) {
-  var row = 1;
-  tableRow = table.rows[row];
-  while(tableRow != null) {
-    tableRow.parentNode.removeChild(tableRow);
-    tableRow = table.rows[row];
-  }
-
 }
 
 function listenToPlayerClicked() {
@@ -137,22 +115,6 @@ function listenToPlayerClicked() {
   });
 }
 
-function playerWins() {
-  if (!isGameOver) {
-    shouldShowProgressBar(false);
-    var h = document.createElement("H1");
-    var t = document.createTextNode("Loteria! You Win!");
-    h.appendChild(t);
-    winnerDisplay.appendChild(h);
-    winnerDisplay.setAttribute("class", "");
-    winnerDisplay.classList.add("show");
-    winnerDisplay.classList.add("alert");
-    winnerDisplay.classList.add("alert-success");
-    clearInterval(countdownTimer);
-    gameOver();
-  }
-}
-
 function gameOver() {
   isGameOver = true;
   startButton.setAttribute("class", "")
@@ -160,7 +122,6 @@ function gameOver() {
   startButton.classList.add("btn");
   startButton.classList.add("btn-success");
   startButton.textContent = "Play Again!"
-
 }
 
 function onDeckClicked() {
@@ -170,50 +131,39 @@ function onDeckClicked() {
   }
 }
 
-function updatePlayerTableCard() {
-  leftTableNumber.textContent = "Tabla " + (currentLeftCard + 1);
+function updateCardTable(isPlayerCard) {
+  var cardTable = rightCardTable;
+  var tableNumberView = rightTableNumber;
+  var currentCardIndex = currentRightCard;
+
+  if (isPlayerCard) {
+    tableNumberView = leftTableNumber;
+    currentCardIndex = currentLeftCard;
+    cardTable = leftCardTable;
+  }
+  tableNumberView.textContent = "Tabla " + (currentCardIndex + 1);
+
   var newRow;
   var index = 0;
-  newRow = leftCardTable.insertRow();
+  newRow = cardTable.insertRow();
 
-  for (var i = 0; i < largeCards[currentLeftCard].length; i++) {
+  for (var i = 0; i < largeCards[currentCardIndex].length; i++) {
     if (i % 4 === 0) {
-      newRow = leftCardTable.insertRow();
+      newRow = cardTable.insertRow();
       index = 0;
     }
 
     var newCell = newRow.insertCell(index);
     var img = document.createElement('img');
-    img.src = cards[largeCards[currentLeftCard][i] - 1].cardImage;
+    img.src = cards[largeCards[currentCardIndex][i] - 1].cardImage;
     img.classList.add("cardImage");
     newCell.className = "playerCell";
     newCell.appendChild(img);
     index++;
   }
 
-  listenToPlayerClicked();
-}
-
-function updateComputerTableCard() {
-  rightTableNumber.textContent = "Tabla " + (currentRightCard + 1);
-  var newRow;
-  var index = 0;
-  newRow = rightCardTable.insertRow();
-
-  for (var i = 0; i < largeCards[currentRightCard].length; i++) {
-    if (i % 4 === 0) {
-      newRow = rightCardTable.insertRow();
-      index = 0;
-    }
-
-    var newCell = newRow.insertCell(index);
-
-    var img = document.createElement('img');
-    img.src = cards[largeCards[currentRightCard][i] - 1].cardImage;
-    img.classList.add("cardImage");
-    newCell.appendChild(img);
-
-    index++;
+  if (isPlayerCard) {
+    listenToPlayerClicked();
   }
 }
 
@@ -265,9 +215,9 @@ function checkIfCardWins(cardTable, isPlayerCard) {
 
       if (col === 3 && numOfOverlays === 4) {
         if (isPlayerCard) {
-          return playerWins();
+          return displayWinner(playerWinsText);
         } else {
-          return computerWins();
+          return displayWinner(computerWinsText);
         }
       }
     }
@@ -288,9 +238,9 @@ function checkIfCardWins(cardTable, isPlayerCard) {
 
       if (row === 5 && numOfOverlays === 4) {
         if (isPlayerCard) {
-          return playerWins();
+          return displayWinner(playerWinsText);
         } else {
-          return computerWins();
+          return displayWinner(computerWinsText);
         }
       }
     }
@@ -316,15 +266,15 @@ function checkIfCardWins(cardTable, isPlayerCard) {
 
     if (numOfOverlaysFromLeftToRight === 4) {
       if (isPlayerCard) {
-        return playerWins();
+        return displayWinner(playerWinsText);
       } else {
-        return computerWins();
+        return displayWinner(computerWinsText);
       }
     } else if (numOfOverlaysFromRightToLeft == 4) {
       if (isPlayerCard) {
-        return playerWins();
+        return displayWinner(playerWinsText);
       } else {
-        return computerWins();
+        return displayWinner(computerWinsText);
       }
     }
 
@@ -332,18 +282,17 @@ function checkIfCardWins(cardTable, isPlayerCard) {
   }
 }
 
-function computerWins() {
+function displayWinner(gameOverText) {
   if (!isGameOver) {
-    var h = document.createElement("H1");
-    var t = document.createTextNode("Loteria! Computer Wins!");
     shouldShowProgressBar(false);
+    var h = document.createElement("H1");
+    var t = document.createTextNode(gameOverText);
+    h.appendChild(t);
+    winnerDisplay.appendChild(h);
     winnerDisplay.setAttribute("class", "");
     winnerDisplay.classList.add("show");
     winnerDisplay.classList.add("alert");
     winnerDisplay.classList.add("alert-success");
-    h.appendChild(t);
-    winnerDisplay.appendChild(h);
-
     clearInterval(countdownTimer);
     gameOver();
   }
@@ -372,6 +321,25 @@ function updateTimer() {
     countdownTimerSeconds = 5;
     countdownTimer = setInterval(updateTimer, 1000);
     onDeckClicked();
+  }
+}
+
+function shouldShowProgressBar(shouldShowProgressBar) {
+  if (shouldShowProgressBar) {
+    progressBar.setAttribute("class", "")
+    progressBar.classList.add("show");
+  } else {
+    progressBar.setAttribute("class", "")
+    progressBar.classList.add("hide");
+  }
+}
+
+function resetTableRows(table) {
+  var row = 1;
+  tableRow = table.rows[row];
+  while(tableRow != null) {
+    tableRow.parentNode.removeChild(tableRow);
+    tableRow = table.rows[row];
   }
 }
 
