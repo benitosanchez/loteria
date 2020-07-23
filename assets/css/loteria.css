@@ -1,0 +1,61 @@
+#container {
+  width: 80%;
+  margin: 0 auto;
+}
+
+#deckCardImage {
+  width: 150px;
+  height: 200px;
+  margin: auto;
+  display: block;
+}
+
+.cardImage {
+  width: 75px;
+  height: 100px;
+  text-align: center;
+  margin: 0;
+
+}
+
+h1 {
+  text-align: center;
+}
+
+#deck {
+  width: 15%;
+  height: 20%;
+  margin: 0 auto;
+  font-weight: bold;
+}
+
+#start {
+  width: 150px;
+}
+
+.leftCard {
+  width: 40px;
+  display: block;
+}
+
+.rightCard {
+  width: 40px;
+  float: left;
+  display: block;
+}
+
+.darkOverlay {
+ background-color: #000000;
+}
+
+.transparentImage {
+  opacity: 0.5;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
