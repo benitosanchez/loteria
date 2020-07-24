@@ -1,6 +1,35 @@
+body {
+  background: url("../img/background.png") no-repeat center fixed;
+  /* -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover; */
+}
+
 #container {
-  width: 80%;
+  width: 90%;
+  padding: 5%;
   margin: 0 auto;
+  background-color: #25CED1;
+  /* white FFFFFF, light whitish FCEADE, orage FF8A5B, red EA526F light blue 25CED1*/
+}
+
+#previousButton, #selectCardButton, #nextButton {
+  padding: 1%;
+  margin: 1%;
+}
+
+#leftCard table {
+  background: white;
+}
+
+#rightCard table {
+  background: white;
+
+}
+
+.alert {
+  background: #FCEADE;
 }
 
 #deckCardImage {
@@ -18,7 +47,25 @@
 
 }
 
+.badge {
+    background: radial-gradient( 5px -9px, circle, white 8%, #EA526F 26px );
+    background-color: #EA526F;
+    border: 2px solid white;
+    border-radius: 12px; /* one half of ( (border * 2) + height + padding ) */
+    box-shadow: 1px 1px 1px black;
+    color: white;
+    font: bold 15px/13px Helvetica, Verdana, Tahoma;
+    height: 10%;
+    min-width: 14px;
+    padding: 4px 3px 0 3px;
+    text-align: center;
+}
+
 h1 {
+  font-family: 'Francois One', sans-serif;
+}
+
+#title {
   text-align: center;
 }
 

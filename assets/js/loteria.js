@@ -10,6 +10,15 @@ var currentLeftCard = 0; // Refers to table 1.
 var currentRightCard = 0;
 var countdownTimerSeconds = 5;
 var isGameOver;
+var hasGameStarted;
+
+const playButtonStates = {
+  DISABLED: "disabled",
+  START: "start",
+  CONTINUE: "continue",
+  PAUSE: "pause",
+  RESTART: "restart"
+}
 
 var computerWinsText = "Loteria! Computer Wins!";
 var playerWinsText = "Loteria! You Win!";
@@ -19,43 +28,137 @@ var deckImage = document.querySelector('#deckCardImage');
 var leftCardTable = document.querySelector('.leftCard table').getElementsByTagName('tbody')[0];
 var leftTableNumber = document.querySelector('#leftTableNumber');
 var rightCardTable = document.querySelector('.rightCard table').getElementsByTagName('tbody')[0];
+var computerCardHolder = document.querySelector(".rightCard");
 var rightTableNumber = document.querySelector('#rightTableNumber');
 var playerSelections;
 var progressBar = document.getElementById("progressBar");
 var previousButton = document.querySelector("#previousButton");
 var nextButton = document.querySelector("#nextButton");
+var selectCardButton = document.querySelector("#selectCardButton");
 var startButton = document.querySelector("#startOrReset");
 var winnerDisplay = document.getElementById("winnerDisplay");
 var alerts = document.querySelectorAll(".alert");
+var firstInstructionalStepSection = document.querySelector("#firstInstructionalStepSection");
+
 init();
 
 function init() {
+  console.log(startButton);
+  hasGameStarted = false;
+  console.log(firstInstructionalStepSection);
   currentDeckCardIndex = -1;
   isGameOver = false;
   cards = createAllCards();
   largeCards = setupLargeCards();
   shuffledDeck = shuffleDeck();
   deckImage.src = "assets/img/cardBack.png";
-  currentRightCard = generateRandomTableCardsIndex();
 
-  updateCardTable(false); // set up card table for computer
   updateCardTable(true); // setup card table for player
   listenToPlayerClicked();
   listenForStartRestartButtonClicks();
   listenForPreviousNextButtonClicks();
+  listenForSelectCardButtonClicks();
+  shouldShowStartButton(playButtonStates.DISABLED);
+  shouldShowComputerTable(false);
+}
+
+function listenForSelectCardButtonClicks() {
+  selectCardButton.addEventListener("click", function() {
+    console.log("clicked");
+    hidePreviousNextAndSelectButtons();
+    shouldShowComputerTable(true);
+    shouldShowStartButton(playButtonStates.START);
+    currentRightCard = generateRandomTableCardsIndex();
+    updateCardTable(false); // set up card table for computer
+
+  });
+}
+
+function hidePreviousNextAndSelectButtons() {
+  $("#firstInstructionalStepSection").toggle(function() {
+    $("#firstInstructionalStepSection").addClass("hide");
+    $("#firstInstructionalStepSection").removeClass("show");
+  }, function() {
+    $("#firstInstructionalStepSection").addClass("show");
+    $("#firstInstructionalStepSection").removeClass("hide");
+  });
+}
+
+function shouldShowComputerTable(shouldShow) {
+  console.log("shouldShowCOmputerTable: " + shouldShow);
+  if (shouldShow) {
+    computerCardHolder.setAttribute("class", "");
+    computerCardHolder.classList.add("show");
+    computerCardHolder.classList.add("rightCard");
+    computerCardHolder.classList.add("col");
+  } else {
+    computerCardHolder.setAttribute("class", "");
+    computerCardHolder.classList.add("hide");
+  }
+  console.log(computerCardHolder);
+}
+
+function shouldShowStartButton(startButtonState) {
+  console.log("shouldShow: " + shouldShowStartButton);
+  if (startButtonState === playButtonStates.START) {
+    startButton.textContent = "Start";
+    startButton.classList.add(playButtonStates.START);
+    startButton.classList.remove(playButtonStates.CONTINUE);
+    startButton.classList.remove(playButtonStates.PAUSE);
+    startButton.classList.remove(playButtonStates.RESTART);
+    startButton.classList.remove(playButtonStates.DISABLED);
+
+  }
+  else if (startButtonState === playButtonStates.CONTINUE) {
+    startButton.textContent = "Continue";
+
+    startButton.classList.add(playButtonStates.CONTINUE);
+    startButton.classList.remove(playButtonStates.START);
+    startButton.classList.remove(playButtonStates.PAUSE);
+    startButton.classList.remove(playButtonStates.RESTART);
+    startButton.classList.remove(playButtonStates.DISABLED);
+
+  } else if (startButtonState === playButtonStates.PAUSE){
+    startButton.textContent = "Pause";
+
+    startButton.classList.add(playButtonStates.PAUSE);
+    startButton.classList.remove(playButtonStates.RESTART);
+    startButton.classList.remove(playButtonStates.CONTINUE);
+    startButton.classList.remove(playButtonStates.START);
+    startButton.classList.remove(playButtonStates.DISABLED);
+
+  } else if (startButtonState === playButtonStates.RESTART) {
+    startButton.textContent = "Restart";
+
+    startButton.classList.add(playButtonStates.RESTART);
+    startButton.classList.remove(playButtonStates.PAUSE);
+    startButton.classList.remove(playButtonStates.START);
+    startButton.classList.remove(playButtonStates.CONTINUE);
+    startButton.classList.remove(playButtonStates.DISABLED);
+
+  } else if (startButtonState === playButtonStates.DISABLED) {
+    startButton.textContent = "Start";
+    startButton.classList.add(playButtonStates.DISABLED);
+    startButton.classList.remove(playButtonStates.RESTART);
+    startButton.classList.remove(playButtonStates.PAUSE);
+    startButton.classList.remove(playButtonStates.START);
+    startButton.classList.remove(playButtonStates.CONTINUE);
+  }
+
+  console.log(startButton);
+
 }
 
 function listenForStartRestartButtonClicks() {
-  startButton.addEventListener("click", function(){
-    if (!isGameOver) {
+  console.log(startButton);
+  startButton.addEventListener("click", function(e){
+    console.log(e);
+    if (startButton.classList.contains(playButtonStates.START)) {
+      hasGameStarted = true;
+      shouldShowComputerTable(true);
+
       countdownTimer = setInterval(updateTimer, 1000);
       shouldShowProgressBar(true);
-      startButton.setAttribute("class", "")
-      startButton.classList.add("hide");
-      previousButton.setAttribute("class", "");
-      previousButton.classList.add("hide");
-      nextButton.setAttribute("class", "");
-      nextButton.classList.add("hide");
 
       for (var i = 0; i < alerts.length; i++) {
         alerts[i].setAttribute("class", "");
@@ -63,7 +166,14 @@ function listenForStartRestartButtonClicks() {
       }
 
       onDeckClicked();
-    } else {
+      shouldShowStartButton(playButtonStates.PAUSE);
+    } else if (startButton.classList.contains(playButtonStates.CONTINUE)) {
+      shouldPauseTimer(false);
+      shouldShowStartButton(playButtonStates.PAUSE);
+    } else if (startButton.classList.contains(playButtonStates.PAUSE)) {
+      shouldPauseTimer(true);
+      shouldShowStartButton(playButtonStates.CONTINUE);
+    } else if(startButton.classList.contains(playButtonStates.RESTART)){
       location.reload();
     }
   });
@@ -77,7 +187,7 @@ function listenForPreviousNextButtonClicks() {
       currentLeftCard--;
     }
     resetTableRows(leftCardTable);
-    updatePlayerTableCard();
+    updateCardTable(true);
   });
 
   nextButton.addEventListener("click", function() {
@@ -87,7 +197,7 @@ function listenForPreviousNextButtonClicks() {
       currentLeftCard++;
     }
     resetTableRows(leftCardTable);
-    updatePlayerTableCard();
+    updateCardTable(true);
   });
 }
 
@@ -117,15 +227,11 @@ function listenToPlayerClicked() {
 
 function gameOver() {
   isGameOver = true;
-  startButton.setAttribute("class", "")
-  startButton.classList.add("show");
-  startButton.classList.add("btn");
-  startButton.classList.add("btn-success");
-  startButton.textContent = "Play Again!"
+  shouldShowStartButton(playButtonStates.RESTART);
 }
 
 function onDeckClicked() {
-  if (!isGameOver) {
+  if (!isGameOver && hasGameStarted) {
     currentDeckCardIndex++;
     updateDeck();
   }
@@ -312,6 +418,24 @@ function shuffleDeck() {
   return shuffledCards;
 }
 
+function shouldPauseTimer(shouldPauseTimer) {
+  if (shouldPauseTimer) {
+    clearInterval(countdownTimer);
+  } else {
+    countdownTimer = setInterval(updateTimer, 1000);
+
+    progressBar.value = 5 - countdownTimerSeconds;
+    countdownTimerSeconds -= 1;
+
+    if(countdownTimerSeconds < 0){
+      clearInterval(countdownTimer);
+      countdownTimerSeconds = 5;
+      countdownTimer = setInterval(updateTimer, 1000);
+      onDeckClicked();
+    }
+  }
+}
+
 function updateTimer() {
   progressBar.value = 5 - countdownTimerSeconds;
   countdownTimerSeconds -= 1;
@@ -348,7 +472,14 @@ function generateRandomCardIndex() {
 }
 
 function generateRandomTableCardsIndex() {
-  return Math.floor((Math.random() * largeCards.length));
+  console.log(currentLeftCard);
+
+  var tempLargeCardIndex = Math.floor((Math.random() * largeCards.length));
+  while(tempLargeCardIndex === currentLeftCard) {
+    tempLargeCardIndex = Math.floor((Math.random() * largeCards.length));
+  }
+  console.log(tempLargeCardIndex);
+  return tempLargeCardIndex;
 }
 
 function setupLargeCards() {
